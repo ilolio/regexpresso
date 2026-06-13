@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>regexpresso — 正規表現を、淹れたての一杯のように</title>
+  <meta name="description" content="正規表現をライブで試し、構造をグラフィカルに分解し、よく使う書き方をすぐ引ける開発者向けwebツール。" />
+  <meta name="color-scheme" content="dark light" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%98%95%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">☕</span>
+      <div class="brand-text">
+        <h1>regex<span>presso</span></h1>
+        <p class="tagline">淹れたての正規表現を、その場で味見。</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a class="ghost-btn" href="https://github.com/ilolio/regexpresso" target="_blank" rel="noopener" title="GitHubで見る" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      <button class="ghost-btn" id="theme-toggle" title="テーマ切り替え" aria-label="テーマ切り替え">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 7a5 5 0 100 10 5 5 0 000-10zm0-5a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 16a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zM4.22 4.22a1 1 0 011.42 0l1.4 1.4A1 1 0 015.64 7.05l-1.42-1.4a1 1 0 010-1.43zm12.72 12.73a1 1 0 011.41 0l1.42 1.4a1 1 0 11-1.42 1.42l-1.41-1.4a1 1 0 010-1.42zM2 12a1 1 0 011-1h2a1 1 0 110 2H3a1 1 0 01-1-1zm16 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zM4.22 19.78a1 1 0 010-1.42l1.42-1.4a1 1 0 011.4 1.42l-1.4 1.4a1 1 0 01-1.42 0zM16.94 7.05a1 1 0 010-1.42l1.41-1.4a1 1 0 111.42 1.42l-1.42 1.4a1 1 0 01-1.41 0z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M21.64 13a1 1 0 00-1.05-.14 8 8 0 01-3.37.73 8.15 8.15 0 01-8.14-8.1 8 8 0 01.74-3.4 1 1 0 00-1.3-1.31A10.14 10.14 0 1022 14.05a1 1 0 00-.36-1.05z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ===== Workbench ===== -->
+    <section class="workbench" aria-label="正規表現エディタ">
+      <div class="panel pattern-panel">
+        <div class="panel-head">
+          <span class="panel-title">パターン</span>
+          <div class="flag-bar" id="flag-bar" role="group" aria-label="フラグ">
+            <button class="flag" data-flag="g" title="global — すべての一致">g</button>
+            <button class="flag" data-flag="i" title="ignoreCase — 大文字小文字を無視">i</button>
+            <button class="flag" data-flag="m" title="multiline — ^$ を行頭行末に">m</button>
+            <button class="flag" data-flag="s" title="dotAll — . が改行にも一致">s</button>
+            <button class="flag" data-flag="u" title="unicode">u</button>
+            <button class="flag" data-flag="y" title="sticky — lastIndexから一致">y</button>
+          </div>
+        </div>
+        <div class="pattern-input-wrap">
+          <span class="delim">/</span>
+          <input id="pattern" class="pattern-input" type="text" spellcheck="false" autocomplete="off"
+                 autocapitalize="off" placeholder="正規表現を入力…  例: (\d{4})-(\d{2})-(\d{2})" />
+          <span class="delim">/</span>
+          <span class="delim flags-echo" id="flags-echo"></span>
+          <button class="copy-mini" id="copy-pattern" title="正規表現リテラルをコピー" aria-label="コピー">⧉</button>
+        </div>
+        <div class="error-line" id="error-line" role="alert"></div>
+      </div>
+
+      <div class="dual">
+        <div class="panel test-panel">
+          <div class="panel-head">
+            <span class="panel-title">テスト文字列</span>
+            <div class="head-actions">
+              <span class="stat" id="match-count">0 件一致</span>
+              <button class="ghost-btn sm" id="sample-text" title="サンプル文字列を入れる">サンプル</button>
+            </div>
+          </div>
+          <div class="editor-stack">
+            <div class="highlight-layer" id="highlight" aria-hidden="true"></div>
+            <textarea id="test-input" class="test-input" spellcheck="false" autocomplete="off"
+              placeholder="ここに対象テキストを貼り付け…"></textarea>
+          </div>
+        </div>
+
+        <div class="panel side-panel">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="explain" role="tab">構造を分解</button>
+            <button class="tab" data-tab="matches" role="tab">一致 / グループ</button>
+            <button class="tab" data-tab="replace" role="tab">置換</button>
+          </div>
+          <div class="tab-body">
+            <div class="tab-pane active" data-pane="explain" role="tabpanel">
+              <div id="explain-out" class="explain-out"></div>
+            </div>
+            <div class="tab-pane" data-pane="matches" role="tabpanel">
+              <div id="matches-out" class="matches-out"></div>
+            </div>
+            <div class="tab-pane" data-pane="replace" role="tabpanel">
+              <div class="replace-controls">
+                <label class="field-label" for="replace-input">置換後（<code>$1</code> <code>$&lt;name&gt;</code> 使用可）</label>
+                <input id="replace-input" class="replace-input" type="text" spellcheck="false"
+                       placeholder="$1/$2/$3" autocomplete="off" />
+              </div>
+              <div class="replace-result-label">結果プレビュー</div>
+              <pre id="replace-out" class="replace-out"></pre>
+              <button class="ghost-btn sm" id="copy-replace">結果をコピー</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Reference ===== -->
+    <aside class="reference" aria-label="リファレンス">
+      <div class="panel">
+        <div class="ref-tabs" role="tablist">
+          <button class="ref-tab active" data-ref="cheat" role="tab">早見表</button>
+          <button class="ref-tab" data-ref="snippets" role="tab">スニペット</button>
+        </div>
+        <div class="ref-search-wrap">
+          <input id="ref-search" class="ref-search" type="search" placeholder="検索… (例: 数字, email)" autocomplete="off" />
+        </div>
+        <div class="ref-body">
+          <div class="ref-pane active" data-refpane="cheat" id="cheat-list"></div>
+          <div class="ref-pane" data-refpane="snippets" id="snippet-list"></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footsie">
+    <span>ブラウザ内だけで完結 — 入力はどこにも送信されません。</span>
+    <button class="link-btn" id="share-btn">🔗 共有リンクをコピー</button>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/explain.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
