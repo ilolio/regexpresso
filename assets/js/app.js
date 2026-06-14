@@ -23,7 +23,9 @@
     toast: $("#toast"),
   };
 
-  const state = { flags: new Set(["g"]) };
+  // VSCode の検索が正規表現で使う既定フラグ (global / ignoreCase / multiline / unicode)
+  const VSCODE_DEFAULT_FLAGS = ["g", "i", "m", "u"];
+  const state = { flags: new Set(VSCODE_DEFAULT_FLAGS) };
 
   /* ---------- utilities ---------- */
   function escapeHtml(s) {
@@ -241,6 +243,12 @@
     renderFlags();
     run();
   });
+  $("#flag-tip").addEventListener("click", () => {
+    state.flags = new Set(VSCODE_DEFAULT_FLAGS);
+    renderFlags();
+    run();
+    toast("VSCode 既定フラグ (gimu) に戻しました");
+  });
 
   /* ---------- tabs ---------- */
   $$(".tab").forEach((t) =>
@@ -343,8 +351,9 @@
     localStorage.setItem("rx-theme", next);
   });
   (function initTheme() {
+    // 既定は light。過去に選択があればそれを尊重する。
     const saved = localStorage.getItem("rx-theme");
-    if (saved) document.documentElement.setAttribute("data-theme", saved);
+    document.documentElement.setAttribute("data-theme", saved || "light");
   })();
 
   /* ---------- persistence + share ---------- */
@@ -390,7 +399,7 @@
       el.pattern.value = "(\\d{4})-(\\d{2})-(\\d{2})";
       el.test.value = "リリース日: 2026-06-13、次回は 2026-12-31 を予定。";
       el.replaceInput.value = "$1/$2/$3";
-      state.flags = new Set(["g"]);
+      state.flags = new Set(VSCODE_DEFAULT_FLAGS);
     }
   }
 

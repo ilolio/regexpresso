@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="dark">
+<html lang="ja" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -38,13 +38,18 @@
       <div class="panel pattern-panel">
         <div class="panel-head">
           <span class="panel-title">パターン</span>
-          <div class="flag-bar" id="flag-bar" role="group" aria-label="フラグ">
-            <button class="flag" data-flag="g" title="global — すべての一致">g</button>
-            <button class="flag" data-flag="i" title="ignoreCase — 大文字小文字を無視">i</button>
-            <button class="flag" data-flag="m" title="multiline — ^$ を行頭行末に">m</button>
-            <button class="flag" data-flag="s" title="dotAll — . が改行にも一致">s</button>
-            <button class="flag" data-flag="u" title="unicode">u</button>
-            <button class="flag" data-flag="y" title="sticky — lastIndexから一致">y</button>
+          <div class="flag-wrap">
+            <div class="flag-bar" id="flag-bar" role="group" aria-label="フラグ">
+              <button class="flag vsc" data-flag="g" title="global — すべての一致を検索 ／ VSCode 既定でオン">g</button>
+              <button class="flag vsc" data-flag="i" title="ignoreCase — 大文字小文字を無視 ／ VSCode 既定でオン（Match Case オフ相当）">i</button>
+              <button class="flag vsc" data-flag="m" title="multiline — ^ $ を各行の行頭・行末に ／ VSCode 既定でオン">m</button>
+              <button class="flag" data-flag="s" title="dotAll — . が改行にも一致 ／ VSCode 既定ではオフ">s</button>
+              <button class="flag vsc" data-flag="u" title="unicode — Unicode として解釈 ／ VSCode 既定でオン">u</button>
+              <button class="flag" data-flag="y" title="sticky — lastIndex の位置から一致 ／ VSCode 既定ではオフ">y</button>
+            </div>
+            <button class="flag-tip" id="flag-tip" type="button"
+              title="VSCode の検索と同じ既定フラグ:&#10;g — global（すべての一致）&#10;i — ignoreCase（大文字小文字を無視 / Match Case オフ相当）&#10;m — multiline（^ $ を行ごとに）&#10;u — unicode&#10;クリックで VSCode 既定（gimu）に戻す"
+              aria-label="VSCode 既定フラグの説明">ⓘ VSCode 既定: <b>gimu</b></button>
           </div>
         </div>
         <div class="pattern-input-wrap">
