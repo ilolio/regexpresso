@@ -22,6 +22,12 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <div class="preset-switch" id="preset-switch" role="group" aria-label="設定プリセット" title="設定プリセット — フラグとコピー形式をまとめて切り替え">
+        <span class="preset-label">プリセット</span>
+        <button class="preset-btn" data-preset="vscode" title="VSCode の検索と同じ。フラグ gimu・パターンはそのままコピー。">VSCode</button>
+        <button class="preset-btn" data-preset="javascript" title="JS の正規表現リテラル。/pattern/flags 形式でコピー。フラグ g。">JS</button>
+        <button class="preset-btn" data-preset="python" title="Python re 向け。raw 文字列 r&quot;...&quot; 形式でコピー。フラグ g。">Python</button>
+      </div>
       <a class="ghost-btn" href="https://github.com/ilolio/regexpresso" target="_blank" rel="noopener" title="GitHubで見る" aria-label="GitHub">
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
@@ -40,25 +46,24 @@
           <span class="panel-title">パターン</span>
           <div class="flag-wrap">
             <div class="flag-bar" id="flag-bar" role="group" aria-label="フラグ">
-              <button class="flag vsc" data-flag="g" title="global — すべての一致を検索 ／ VSCode 既定でオン">g</button>
-              <button class="flag vsc" data-flag="i" title="ignoreCase — 大文字小文字を無視 ／ VSCode 既定でオン（Match Case オフ相当）">i</button>
-              <button class="flag vsc" data-flag="m" title="multiline — ^ $ を各行の行頭・行末に ／ VSCode 既定でオン">m</button>
-              <button class="flag" data-flag="s" title="dotAll — . が改行にも一致 ／ VSCode 既定ではオフ">s</button>
-              <button class="flag vsc" data-flag="u" title="unicode — Unicode として解釈 ／ VSCode 既定でオン">u</button>
-              <button class="flag" data-flag="y" title="sticky — lastIndex の位置から一致 ／ VSCode 既定ではオフ">y</button>
+              <button class="flag" data-flag="g" title="global — すべての一致を検索">g</button>
+              <button class="flag" data-flag="i" title="ignoreCase — 大文字小文字を無視">i</button>
+              <button class="flag" data-flag="m" title="multiline — ^ $ を各行の行頭・行末に">m</button>
+              <button class="flag" data-flag="s" title="dotAll — . が改行にも一致">s</button>
+              <button class="flag" data-flag="u" title="unicode — Unicode として解釈">u</button>
+              <button class="flag" data-flag="y" title="sticky — lastIndex の位置から一致">y</button>
             </div>
             <button class="flag-tip" id="flag-tip" type="button"
-              title="VSCode の検索と同じ既定フラグ:&#10;g — global（すべての一致）&#10;i — ignoreCase（大文字小文字を無視 / Match Case オフ相当）&#10;m — multiline（^ $ を行ごとに）&#10;u — unicode&#10;クリックで VSCode 既定（gimu）に戻す"
-              aria-label="VSCode 既定フラグの説明">ⓘ VSCode 既定: <b>gimu</b></button>
+              aria-label="プリセット既定フラグに戻す">ⓘ <span id="flag-tip-label">VSCode 既定: <b>gimu</b></span></button>
           </div>
         </div>
-        <div class="pattern-input-wrap">
-          <span class="delim">/</span>
+        <div class="pattern-input-wrap" id="pattern-wrap" data-fmt="bare">
+          <span class="delim" id="delim-lead">/</span>
           <input id="pattern" class="pattern-input" type="text" spellcheck="false" autocomplete="off"
                  autocapitalize="off" placeholder="正規表現を入力…  例: (\d{4})-(\d{2})-(\d{2})" />
-          <span class="delim">/</span>
+          <span class="delim" id="delim-trail">/</span>
           <span class="delim flags-echo" id="flags-echo"></span>
-          <button class="copy-mini" id="copy-pattern" title="正規表現リテラルをコピー" aria-label="コピー">⧉</button>
+          <button class="copy-mini" id="copy-pattern" title="パターンをコピー" aria-label="コピー">⧉</button>
         </div>
         <div class="error-line" id="error-line" role="alert"></div>
       </div>

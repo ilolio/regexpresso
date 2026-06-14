@@ -21,11 +21,28 @@
     snippetList: $("#snippet-list"),
     refSearch: $("#ref-search"),
     toast: $("#toast"),
+    patternWrap: $("#pattern-wrap"),
+    delimLead: $("#delim-lead"),
+    delimTrail: $("#delim-trail"),
+    presetSwitch: $("#preset-switch"),
+    flagTip: $("#flag-tip"),
+    flagTipLabel: $("#flag-tip-label"),
   };
 
-  // VSCode の検索が正規表現で使う既定フラグ (global / ignoreCase / multiline / unicode)
-  const VSCODE_DEFAULT_FLAGS = ["g", "i", "m", "u"];
-  const state = { flags: new Set(VSCODE_DEFAULT_FLAGS) };
+  /* ---------- presets ----------
+   * 各プリセットは「既定フラグ」と「コピー/表示の形式」をまとめて定義する。
+   * copy 形式:
+   *   literal → /pattern/flags   (区切り文字あり)
+   *   bare    → pattern          (区切りなし。VSCode の検索ボックス相当)
+   *   python  → r"pattern"       (Python の raw 文字列) */
+  const PRESETS = {
+    vscode: { label: "VSCode", flags: ["g", "i", "m", "u"], copy: "bare", lead: "/", trail: "/" },
+    javascript: { label: "JavaScript", flags: ["g"], copy: "literal", lead: "/", trail: "/" },
+    python: { label: "Python", flags: ["g"], copy: "python", lead: 'r"', trail: '"' },
+  };
+  const DEFAULT_PRESET = "vscode";
+
+  const state = { flags: new Set(PRESETS[DEFAULT_PRESET].flags), preset: DEFAULT_PRESET };
 
   /* ---------- utilities ---------- */
   function escapeHtml(s) {
@@ -229,11 +246,49 @@
     el.highlight.scrollLeft = el.test.scrollLeft;
   }
 
+  /* ---------- presets ---------- */
+  function currentPreset() {
+    return PRESETS[state.preset] || PRESETS[DEFAULT_PRESET];
+  }
+  // Apply a preset. By default this resets flags to the preset's defaults;
+  // pass {keepFlags:true} to keep current flags (used when restoring state).
+  function applyPreset(name, opts = {}) {
+    if (!PRESETS[name]) name = DEFAULT_PRESET;
+    state.preset = name;
+    const p = PRESETS[name];
+    if (!opts.keepFlags) state.flags = new Set(p.flags);
+    // copy/display format
+    el.patternWrap.dataset.fmt = p.copy;
+    el.delimLead.textContent = p.lead;
+    el.delimTrail.textContent = p.trail;
+    // active button
+    $$(".preset-btn", el.presetSwitch).forEach((b) =>
+      b.classList.toggle("active", b.dataset.preset === name)
+    );
+    renderFlags();
+  }
+
+  // Build the text produced by the copy/literal action for the current preset.
+  function patternLiteral() {
+    const p = currentPreset();
+    const pat = el.pattern.value;
+    if (p.copy === "bare") return pat;
+    if (p.copy === "python") return 'r"' + pat + '"';
+    return `/${pat}/${flagsString()}`; // literal
+  }
+
   /* ---------- flags ---------- */
   function renderFlags() {
+    const defaults = new Set(currentPreset().flags);
     $$(".flag", el.flagBar).forEach((b) => {
       b.classList.toggle("on", state.flags.has(b.dataset.flag));
+      b.classList.toggle("preset-default", defaults.has(b.dataset.flag));
     });
+    const p = currentPreset();
+    const def = p.flags.join("") || "なし";
+    el.flagTipLabel.innerHTML = `${escapeHtml(p.label)} 既定: <b>${escapeHtml(def)}</b>`;
+    el.flagTip.title =
+      `${p.label} プリセットの既定フラグ: ${def}\nクリックでこの既定に戻す`;
   }
   el.flagBar.addEventListener("click", (e) => {
     const b = e.target.closest(".flag");
@@ -243,11 +298,19 @@
     renderFlags();
     run();
   });
-  $("#flag-tip").addEventListener("click", () => {
-    state.flags = new Set(VSCODE_DEFAULT_FLAGS);
+  el.flagTip.addEventListener("click", () => {
+    const p = currentPreset();
+    state.flags = new Set(p.flags);
     renderFlags();
     run();
-    toast("VSCode 既定フラグ (gimu) に戻しました");
+    toast(`${p.label} 既定フラグ (${p.flags.join("") || "なし"}) に戻しました`);
+  });
+  el.presetSwitch.addEventListener("click", (e) => {
+    const b = e.target.closest(".preset-btn");
+    if (!b) return;
+    applyPreset(b.dataset.preset);
+    run();
+    toast(`${currentPreset().label} プリセットに切り替えました`);
   });
 
   /* ---------- tabs ---------- */
@@ -357,49 +420,74 @@
   })();
 
   /* ---------- persistence + share ---------- */
-  function persist() {
-    const s = {
+  function snapshot() {
+    return {
       p: el.pattern.value,
       f: flagsString(),
       t: el.test.value,
       r: el.replaceInput.value,
+      pr: state.preset,
     };
+  }
+  function persist() {
     try {
-      localStorage.setItem("rx-state", JSON.stringify(s));
+      localStorage.setItem("rx-state", JSON.stringify(snapshot()));
     } catch {}
   }
   function encodeShare() {
-    const s = {
-      p: el.pattern.value,
-      f: flagsString(),
-      t: el.test.value,
-      r: el.replaceInput.value,
-    };
-    return "#" + btoa(unescape(encodeURIComponent(JSON.stringify(s))));
+    return "#" + btoa(unescape(encodeURIComponent(JSON.stringify(snapshot()))));
+  }
+  // ?preset=… で初期プリセットを指定できる（js は javascript の別名）
+  function getQueryPreset() {
+    try {
+      let p = new URLSearchParams(location.search).get("preset");
+      if (!p) return null;
+      p = p.toLowerCase();
+      if (p === "js") p = "javascript";
+      if (p === "vsc" || p === "code") p = "vscode";
+      return PRESETS[p] ? p : null;
+    } catch {
+      return null;
+    }
   }
   function loadState() {
-    let s = null;
+    let hashState = null;
     if (location.hash.length > 1) {
       try {
-        s = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1)))));
+        hashState = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1)))));
       } catch {}
     }
-    if (!s) {
+    let saved = null;
+    if (!hashState) {
       try {
-        s = JSON.parse(localStorage.getItem("rx-state"));
+        saved = JSON.parse(localStorage.getItem("rx-state"));
       } catch {}
     }
+    const queryPreset = getQueryPreset();
+    const s = hashState || saved;
+
     if (s) {
       el.pattern.value = s.p || "";
       el.test.value = s.t || "";
       el.replaceInput.value = s.r || "";
-      if (s.f != null) state.flags = new Set(s.f.split(""));
     } else {
       // friendly default demo
       el.pattern.value = "(\\d{4})-(\\d{2})-(\\d{2})";
       el.test.value = "リリース日: 2026-06-13、次回は 2026-12-31 を予定。";
       el.replaceInput.value = "$1/$2/$3";
-      state.flags = new Set(VSCODE_DEFAULT_FLAGS);
+    }
+
+    // 共有リンク(hash)は完全なスナップショットなのでそのまま再現する。
+    // それ以外では URL の ?preset= が初期プリセットを上書きできる。
+    if (hashState) {
+      applyPreset(hashState.pr || DEFAULT_PRESET, { keepFlags: hashState.f != null });
+      if (hashState.f != null) state.flags = new Set(hashState.f.split(""));
+    } else if (queryPreset) {
+      applyPreset(queryPreset); // 明示指定 → そのプリセットの既定設定を適用
+    } else {
+      const name = (s && s.pr) || DEFAULT_PRESET;
+      applyPreset(name, { keepFlags: s && s.f != null });
+      if (s && s.f != null) state.flags = new Set(s.f.split(""));
     }
   }
 
@@ -409,7 +497,7 @@
     copy(url, "共有リンクをコピーしました");
   });
   $("#copy-pattern").addEventListener("click", () =>
-    copy(`/${el.pattern.value}/${flagsString()}`, "正規表現をコピーしました")
+    copy(patternLiteral(), `${currentPreset().label} 形式でコピーしました`)
   );
   $("#copy-replace").addEventListener("click", () =>
     copy(el.replaceOut.textContent, "結果をコピーしました")
@@ -439,7 +527,6 @@
   /* ---------- boot ---------- */
   renderCheat();
   renderSnippets();
-  loadState();
-  renderFlags();
+  loadState(); // applyPreset() 内で renderFlags() を呼ぶ
   run();
 })();
