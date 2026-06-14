@@ -494,7 +494,7 @@
   $("#share-btn").addEventListener("click", () => {
     const url = location.origin + location.pathname + encodeShare();
     history.replaceState(null, "", encodeShare());
-    copy(url, "共有リンクをコピーしました");
+    copy(url, "共有リンクをコピー（パターン・フラグ・テスト文字列を含む）");
   });
   $("#copy-pattern").addEventListener("click", () =>
     copy(patternLiteral(), `${currentPreset().label} 形式でコピーしました`)
@@ -506,7 +506,7 @@
     el.test.value =
       "Email: hello@example.com / support+dev@regexpresso.dev\n" +
       "日付: 2026-06-13, 2025-12-31\n" +
-      "電話: 090-1234-5678  URL: https://github.com/ilolio/regexpresso\n" +
+      "電話: 090-1234-5678  URL: https://ilolio.github.io/regexpresso\n" +
       "色: #c98a4b  IP: 192.168.0.1  時刻: 09:30:00";
     delete el.test.dataset.fromSnippet;
     run();

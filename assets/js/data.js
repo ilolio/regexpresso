@@ -83,7 +83,7 @@ window.REGEXPRESSO_DATA = (function () {
       tags: "url link リンク web",
       pattern: "https?:\\/\\/[\\w.-]+(?:\\/[\\w./?%&=#-]*)?",
       flags: "g",
-      sample: "https://github.com/ilolio/regexpresso と http://example.com/path?q=1",
+      sample: "https://ilolio.github.io/regexpresso と http://example.com/path?q=1",
     },
     {
       name: "日付 YYYY-MM-DD",
