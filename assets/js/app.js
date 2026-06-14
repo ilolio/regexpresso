@@ -406,6 +406,21 @@
     });
   });
 
+  /* ---------- brand: reset URL to initial ---------- */
+  function resetUrl() {
+    const base = location.origin + location.pathname; // hash と ?query を除去
+    history.replaceState(null, "", base);
+    location.reload();
+  }
+  const brandHome = $("#brand-home");
+  brandHome.addEventListener("click", resetUrl);
+  brandHome.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      resetUrl();
+    }
+  });
+
   /* ---------- theme ---------- */
   $("#theme-toggle").addEventListener("click", () => {
     const cur = document.documentElement.getAttribute("data-theme");

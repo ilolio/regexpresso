@@ -91,7 +91,10 @@ button { font-family: inherit; cursor: pointer; }
   top: 0;
   z-index: 20;
 }
-.brand { display: flex; align-items: center; gap: 13px; }
+.brand { display: flex; align-items: center; gap: 13px; cursor: pointer; border-radius: 10px; transition: var(--transition); outline: none; }
+.brand:hover { opacity: 0.85; }
+.brand:hover .brand-mark { animation-play-state: paused; transform: rotate(-8deg) scale(1.08); }
+.brand:focus-visible { box-shadow: 0 0 0 3px var(--accent-glow); }
 .brand-mark {
   font-size: 30px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
