@@ -406,6 +406,21 @@
     });
   });
 
+  /* ---------- chrome metrics: keep layout height aware of header/footer ----- */
+  const topbarEl = $(".topbar");
+  const footerEl = $(".footsie");
+  function setChromeMetrics() {
+    const root = document.documentElement.style;
+    if (topbarEl) root.setProperty("--header-h", topbarEl.offsetHeight + "px");
+    if (footerEl) root.setProperty("--footer-h", footerEl.offsetHeight + "px");
+  }
+  window.addEventListener("resize", setChromeMetrics);
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(setChromeMetrics);
+    if (topbarEl) ro.observe(topbarEl);
+    if (footerEl) ro.observe(footerEl);
+  }
+
   /* ---------- brand: reset URL to initial ---------- */
   function resetUrl() {
     const base = location.origin + location.pathname; // hash と ?query を除去
@@ -544,4 +559,5 @@
   renderSnippets();
   loadState(); // applyPreset() 内で renderFlags() を呼ぶ
   run();
+  setChromeMetrics();
 })();

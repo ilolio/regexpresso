@@ -8,6 +8,10 @@
   --radius: 14px;
   --radius-sm: 9px;
   --transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* measured at runtime (JS); fallbacks here */
+  --header-h: 64px;
+  --footer-h: 52px;
+  --layout-pad: 22px;
 
   /* match highlight palette (shared) */
   --hl-0: #c98a4b; --hl-1: #6ea8fe; --hl-2: #79c879;
@@ -478,7 +482,15 @@ mark .zero { opacity: 0.6; font-style: italic; }
 
 /* ---------- Reference ---------- */
 .reference { min-width: 0; }
-.reference .panel { position: sticky; top: 86px; display: flex; flex-direction: column; max-height: calc(100vh - 110px); }
+.reference .panel {
+  position: sticky;
+  top: calc(var(--header-h) + var(--layout-pad));
+  display: flex;
+  flex-direction: column;
+  /* viewport minus header, footer, and top+bottom layout padding so the
+     panel fits exactly in the remaining space and never forces page scroll */
+  max-height: calc(100vh - var(--header-h) - var(--footer-h) - (var(--layout-pad) * 2));
+}
 .ref-tabs { display: flex; padding: 8px; gap: 6px; border-bottom: 1px solid var(--border-soft); }
 .ref-tab {
   flex: 1; background: var(--surface-2); border: 1px solid var(--border);
